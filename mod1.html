@@ -7,50 +7,46 @@
 
 <style>
 
-/* Remove chrome tap highlight */
 * {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
-/* ======================
-   BASE PAGE
-====================== */
 body {
   margin: 0;
   height: 100vh;
   overflow: hidden;
   font-family: 'Baloo 2', cursive;
   background: #000;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.6s ease;
 }
 
 body.fade-out {
   opacity: 0;
 }
 
-/* ======================
-   BACKGROUND
-====================== */
+/* ================= BACKGROUND ================= */
+
 .background {
   position: fixed;
   inset: 0;
   background: url("1.png") center center / cover no-repeat;
+  transition: background 0.6s ease;
   z-index: -1;
 }
 
-/* ======================
-   BUTTON BASE STYLE
-====================== */
+/* ================= BUTTON BASE ================= */
+
 .circle-btn {
-  width: 55px;
-  height: 55px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: linear-gradient(145deg, #f5c86b, #f28db2);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: bold;
   color: #3c4c6b;
   cursor: pointer;
   box-shadow:
@@ -64,9 +60,8 @@ body.fade-out {
   transform: scale(0.85);
 }
 
-/* ======================
-   MUSIC BUTTON
-====================== */
+/* ================= MUSIC ================= */
+
 .music-btn {
   position: fixed;
   top: 20px;
@@ -77,33 +72,53 @@ body.fade-out {
 .music-btn.muted::after {
   content: "";
   position: absolute;
-  width: 40px;
+  width: 42px;
   height: 3px;
   background: #3c4c6b;
   transform: rotate(-45deg);
   border-radius: 2px;
 }
 
-/* ======================
-   NAVIGATION BUTTONS
-====================== */
+/* ================= NAVIGATION ================= */
+
 .nav-left {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  bottom: 25px;
+  left: 25px;
   display: flex;
-  gap: 15px;
+  gap: 18px;
 }
 
 .nav-right {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 25px;
+  right: 25px;
 }
 
-/* ======================
-   ORIENTATION LOCK
-====================== */
+/* ================= DIALOGUE ================= */
+
+.dialogue {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  padding: 18px 30px;
+  border-radius: 30px;
+  font-size: 20px;
+  color: #f5c86b;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  max-width: 70%;
+  text-align: center;
+}
+
+.dialogue.show {
+  opacity: 1;
+}
+
+/* ================= ORIENTATION LOCK ================= */
+
 .orientation-lock {
   position: fixed;
   inset: 0;
@@ -127,23 +142,25 @@ body.fade-out {
 
 <body>
 
-<div class="background"></div>
+<div class="background" id="background"></div>
 
 <!-- Music -->
 <div class="circle-btn music-btn muted" id="musicBtn">🎵</div>
 
-<!-- Left/Right Nav -->
+<!-- Navigation -->
 <div class="nav-left">
   <div class="circle-btn" id="prevBtn">&lt;</div>
   <div class="circle-btn" id="nextBtn">&gt;</div>
 </div>
 
-<!-- Confirm -->
 <div class="nav-right">
   <div class="circle-btn" id="confirmBtn">✓</div>
 </div>
 
-<!-- Orientation Lock -->
+<!-- Dialogue -->
+<div class="dialogue" id="dialogueBox"></div>
+
+<!-- Orientation -->
 <div class="orientation-lock" id="orientationWarning">
   Please turn on auto rotate and flip your phone horizontally.
 </div>
@@ -153,25 +170,22 @@ body.fade-out {
 
 <script>
 
-/* ======================
-   AUDIO SYSTEM
-====================== */
+/* ================= AUDIO ================= */
 
 const bgMusic = document.getElementById("bgMusic");
 const tapSound = document.getElementById("tapSound");
 const musicBtn = document.getElementById("musicBtn");
 
-let isMuted = true;
 bgMusic.volume = 0.5;
 tapSound.volume = 0.6;
 
-/* Tap sound everywhere */
+let isMuted = true;
+
 document.addEventListener("pointerdown", () => {
   tapSound.currentTime = 0;
   tapSound.play();
 });
 
-/* Music toggle */
 musicBtn.addEventListener("click", () => {
   if (isMuted) {
     bgMusic.play();
@@ -184,9 +198,7 @@ musicBtn.addEventListener("click", () => {
   }
 });
 
-/* ======================
-   ORIENTATION CHECK
-====================== */
+/* ================= ORIENTATION ================= */
 
 const orientationWarning = document.getElementById("orientationWarning");
 
@@ -201,21 +213,83 @@ function checkOrientation() {
 window.addEventListener("resize", checkOrientation);
 window.addEventListener("load", checkOrientation);
 
-/* ======================
-   BUTTON EVENTS
-====================== */
+/* ================= SCENE SYSTEM ================= */
 
-document.getElementById("prevBtn").addEventListener("click", () => {
-  console.log("Previous");
-});
+const background = document.getElementById("background");
+const dialogueBox = document.getElementById("dialogueBox");
+
+let sceneIndex = 1;
+const maxScene = 3;
+
+function updateScene() {
+  background.style.background = `url("${sceneIndex}.png") center center / cover no-repeat`;
+}
+
+/* ================= NAVIGATION ================= */
 
 document.getElementById("nextBtn").addEventListener("click", () => {
-  console.log("Next");
+  if (sceneIndex < maxScene) {
+    sceneIndex++;
+    updateScene();
+  }
 });
 
-document.getElementById("confirmBtn").addEventListener("click", () => {
-  console.log("Confirm");
+document.getElementById("prevBtn").addEventListener("click", () => {
+  if (sceneIndex > 1) {
+    sceneIndex--;
+    updateScene();
+  }
 });
+
+/* ================= CONFIRM LOGIC ================= */
+
+document.getElementById("confirmBtn").addEventListener("click", () => {
+
+  // Scene 2 → Dialogue
+  if (sceneIndex === 2) {
+    showDialogue("Candies are tasty but we need tickets.");
+  }
+
+  // Scene 3 → Change to 4.png
+  else if (sceneIndex === 3) {
+    sceneIndex = 4;
+    background.style.background = `url("4.png") center center / cover no-repeat`;
+  }
+
+  // Scene 4 → Fade out + Redirect
+  else if (sceneIndex === 4) {
+    document.body.classList.add("fade-out");
+
+    setTimeout(() => {
+      window.location.href = "mod2.html";
+    }, 600);
+  }
+
+});
+
+/* ================= TYPEWRITER ================= */
+
+function showDialogue(text) {
+
+  dialogueBox.innerHTML = "";
+  dialogueBox.classList.add("show");
+
+  let i = 0;
+
+  function type() {
+    if (i < text.length) {
+      dialogueBox.innerHTML += text.charAt(i);
+      i++;
+      setTimeout(type, 40);
+    } else {
+      setTimeout(() => {
+        dialogueBox.classList.remove("show");
+      }, 1800);
+    }
+  }
+
+  type();
+}
 
 </script>
 
