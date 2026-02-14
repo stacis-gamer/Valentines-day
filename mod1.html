@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mod1</title>
+
+<style>
+
+/* Remove chrome tap highlight */
+* {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ======================
+   BASE PAGE
+====================== */
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Baloo 2', cursive;
+  background: #000;
+  transition: opacity 0.5s ease;
+}
+
+body.fade-out {
+  opacity: 0;
+}
+
+/* ======================
+   BACKGROUND
+====================== */
+.background {
+  position: fixed;
+  inset: 0;
+  background: url("1.png") center center / cover no-repeat;
+  z-index: -1;
+}
+
+/* ======================
+   BUTTON BASE STYLE
+====================== */
+.circle-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f5c86b, #f28db2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  color: #3c4c6b;
+  cursor: pointer;
+  box-shadow:
+    inset 4px 4px 8px rgba(255,255,255,0.6),
+    inset -4px -4px 8px rgba(0,0,0,0.2),
+    0 6px 15px rgba(0,0,0,0.4);
+  transition: transform 0.15s ease;
+}
+
+.circle-btn:active {
+  transform: scale(0.85);
+}
+
+/* ======================
+   MUSIC BUTTON
+====================== */
+.music-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.music-btn.muted::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 3px;
+  background: #3c4c6b;
+  transform: rotate(-45deg);
+  border-radius: 2px;
+}
+
+/* ======================
+   NAVIGATION BUTTONS
+====================== */
+.nav-left {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.nav-right {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
+
+/* ======================
+   ORIENTATION LOCK
+====================== */
+.orientation-lock {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  color: #f5c86b;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  font-size: 22px;
+  z-index: 100;
+}
+
+.orientation-lock.active {
+  display: flex;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<!-- Music -->
+<div class="circle-btn music-btn muted" id="musicBtn">🎵</div>
+
+<!-- Left/Right Nav -->
+<div class="nav-left">
+  <div class="circle-btn" id="prevBtn">&lt;</div>
+  <div class="circle-btn" id="nextBtn">&gt;</div>
+</div>
+
+<!-- Confirm -->
+<div class="nav-right">
+  <div class="circle-btn" id="confirmBtn">✓</div>
+</div>
+
+<!-- Orientation Lock -->
+<div class="orientation-lock" id="orientationWarning">
+  Please turn on auto rotate and flip your phone horizontally.
+</div>
+
+<audio id="bgMusic" src="lobby.mp3" loop></audio>
+<audio id="tapSound" src="tap.mp3"></audio>
+
+<script>
+
+/* ======================
+   AUDIO SYSTEM
+====================== */
+
+const bgMusic = document.getElementById("bgMusic");
+const tapSound = document.getElementById("tapSound");
+const musicBtn = document.getElementById("musicBtn");
+
+let isMuted = true;
+bgMusic.volume = 0.5;
+tapSound.volume = 0.6;
+
+/* Tap sound everywhere */
+document.addEventListener("pointerdown", () => {
+  tapSound.currentTime = 0;
+  tapSound.play();
+});
+
+/* Music toggle */
+musicBtn.addEventListener("click", () => {
+  if (isMuted) {
+    bgMusic.play();
+    musicBtn.classList.remove("muted");
+    isMuted = false;
+  } else {
+    bgMusic.pause();
+    musicBtn.classList.add("muted");
+    isMuted = true;
+  }
+});
+
+/* ======================
+   ORIENTATION CHECK
+====================== */
+
+const orientationWarning = document.getElementById("orientationWarning");
+
+function checkOrientation() {
+  if (window.innerHeight > window.innerWidth) {
+    orientationWarning.classList.add("active");
+  } else {
+    orientationWarning.classList.remove("active");
+  }
+}
+
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("load", checkOrientation);
+
+/* ======================
+   BUTTON EVENTS
+====================== */
+
+document.getElementById("prevBtn").addEventListener("click", () => {
+  console.log("Previous");
+});
+
+document.getElementById("nextBtn").addEventListener("click", () => {
+  console.log("Next");
+});
+
+document.getElementById("confirmBtn").addEventListener("click", () => {
+  console.log("Confirm");
+});
+
+</script>
+
+</body>
+</html>
